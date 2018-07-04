@@ -1,4 +1,23 @@
-const myAccount = new Account("snow-patrol");
+class Account {
+
+  constructor(username) {
+    this.username = username;
+    this.transactions = [];
+  }
+
+  get balance() {
+    let sum = 0;
+    for (let item of this.transactions) {
+      sum += item.value;
+    }
+    return sum;
+  }
+
+  addTransaction(transaction) {
+    this.transactions.push(transaction);
+  }
+
+}
 
 class Transaction {
 
@@ -6,54 +25,61 @@ class Transaction {
     this.amount = amount;
     this.account = account;
   }
+
+  commit() {
+    if (!this.isAllowed()) {
+      return false;
+    }
+    // Keep track of the time of the transaction
+    this.time = new Date();
+    // Add the transaction to the account
+    this.account.addTransaction(this);
+    return true;
+  }
+
 }
 
 class Deposit extends Transaction {
 
-  commit() {
-    this.account.balance += this.amount;
+  get value () {
+    return this.amount;
+  }
+
+  isAllowed() {
+    return true;
   }
 
 }
 
 class Withdrawal extends Transaction {
 
-  commit() {
-    this.account.balance -= this.amount;
+  get value () {
+    return -(this.amount);
+  }
+
+  isAllowed() {
+    return (this.account.balance - this.amount >= 0);
   }
 
 }
 
 
 
-class Account {
-
-  constructor(username) {
-    this.username = username;
-    this.balance = 0;
-  }
-}
 
 
 
 
-// DRIVER CODE BELOW
-// We use the code below to "drive" the application logic above and make sure it's working as expected
+const myAccount = new Account('billybob');
 
-t1 = new Withdrawal(50.25, myAccount);
+console.log('Starting Balance:', myAccount.balance);
+
+const t1 = new Deposit(120.00, myAccount);
 t1.commit();
 
-// t1 = new Withdrawal(50.25);
-// t1.commit();
-// console.log('Transaction 1:', t1);
+const t2 = new Withdrawal(50.00, myAccount);
+t2.commit();
 
-// t2 = new Withdrawal(9.99);
-// t2.commit();
-// console.log('Transaction 2:', t2);
+const t3 = new Withdrawal(200, myAccount);
+t3.commit();
 
-// t3 = new Deposit(120.00);
-// t3.commit();
-// console.log('Transaction 3:', t3);
-
-
-// console.log('Balance:', balance);
+console.log('Ending Balance:', myAccount.balance);
